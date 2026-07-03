@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bracket Call — Pronósticos del Mundial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-950:#07211c;
+    --pitch-900:#0c2e26;
+    --pitch-800:#123c31;
+    --pitch-700:#1c5142;
+    --line:#2c6a56;
+    --chalk:#f4f1e8;
+    --chalk-dim:#c9cfc7;
+    --flood:#f2c14e;
+    --flood-dim:#caa03f;
+    --red-card:#e4572e;
+    --green-go:#5fd192;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(242,193,78,0.08), transparent 45%),
+      radial-gradient(ellipse at 80% 0%, rgba(95,209,146,0.06), transparent 40%),
+      var(--pitch-950);
+    color:var(--chalk);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  .stripes{
+    position:fixed; inset:0; z-index:-1; opacity:0.05;
+    background:repeating-linear-gradient(90deg, var(--chalk) 0 2px, transparent 2px 120px);
+  }
+  header{
+    padding:36px 20px 20px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  .kicker{
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing:0.25em;
+    font-size:11px;
+    color:var(--flood);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size:clamp(32px,6vw,56px);
+    letter-spacing:0.02em;
+    margin:6px 0 4px;
+    text-transform:uppercase;
+  }
+  .sub{color:var(--chalk-dim); font-size:14px; max-width:520px; margin:0 auto;}
+
+  nav{
+    display:flex; justify-content:center; gap:6px; flex-wrap:wrap;
+    margin:22px auto; max-width:640px; padding:0 16px;
+  }
+  nav button{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    background:transparent; color:var(--chalk-dim);
+    border:1px solid var(--line); border-radius:999px;
+    padding:9px 16px; cursor:pointer; transition:all .15s ease;
+  }
+  nav button:hover{border-color:var(--flood-dim); color:var(--chalk);}
+  nav button.active{background:var(--flood); color:var(--pitch-950); border-color:var(--flood); font-weight:700;}
+
+  main{max-width:960px; margin:0 auto; padding:0 16px;}
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--pitch-900);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    margin:18px 0;
+  }
+  label{display:block; font-size:12px; color:var(--chalk-dim); margin-bottom:6px; font-family:'JetBrains Mono',monospace; letter-spacing:.05em; text-transform:uppercase;}
+  input[type=text], input[type=password]{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line);
+    background:var(--pitch-800); color:var(--chalk); font-size:15px; font-family:inherit;
+  }
+  input:focus{outline:2px solid var(--flood); outline-offset:1px;}
+  button.primary{
+    background:var(--flood); color:var(--pitch-950); border:none; border-radius:10px;
+    padding:12px 22px; font-weight:700; font-family:'JetBrains Mono',monospace;
+    letter-spacing:.05em; text-transform:uppercase; font-size:13px; cursor:pointer;
+    transition:transform .1s ease;
+  }
+  button.primary:hover{transform:translateY(-1px);}
+  button.primary:disabled{opacity:0.4; cursor:not-allowed; transform:none;}
+  button.ghost{
+    background:transparent; border:1px solid var(--line); color:var(--chalk-dim);
+    border-radius:10px; padding:10px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; cursor:pointer;
+  }
+  .msg{font-size:13px; margin-top:10px; font-family:'JetBrains Mono',monospace;}
+  .msg.err{color:var(--red-card);}
+  .msg.ok{color:var(--green-go);}
+
+  .whoami{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--chalk-dim);
+    padding:10px 16px; border:1px solid var(--line); border-radius:999px; max-width:520px; margin:0 auto 10px;
+  }
+  .whoami b{color:var(--flood);}
+
+  .round-title{
+    font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:.03em;
+    font-size:20px; margin:30px 0 12px; color:var(--flood);
+    display:flex; align-items:center; gap:10px;
+  }
+  .round-title .lock{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--red-card); border:1px solid var(--red-card); padding:2px 8px; border-radius:999px;}
+
+  .match{
+    display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center;
+    background:var(--pitch-900); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; margin-bottom:14px;
+  }
+  .team{display:flex; flex-direction:column; gap:8px;}
+  .team.right{align-items:flex-end;}
+  .team-name{font-weight:700; font-size:16px;}
+  .team.right .team-name{text-align:right;}
+  .score-row{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+  .team.right .score-row{justify-content:flex-end;}
+  .score-input{
+    width:48px; text-align:center; padding:8px 0; border-radius:8px; border:1px solid var(--line);
+    background:var(--pitch-800); color:var(--chalk); font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700;
+  }
+  .score-input:disabled{opacity:.35;}
+  .score-tag{font-size:10px; color:var(--chalk-dim); font-family:'JetBrains Mono',monospace; text-transform:uppercase;}
+  .vs{
+    font-family:'Anton',sans-serif; color:var(--line); font-size:22px; text-align:center;
+  }
+  .pick-btn{
+    margin-top:4px; font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase;
+    padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--chalk-dim); cursor:pointer;
+  }
+  .pick-btn.chosen{background:var(--green-go); color:var(--pitch-950); border-color:var(--green-go); font-weight:700;}
+  .match-footer{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
+  .match-id{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--chalk-dim);}
+  .save-note{font-size:12px; font-family:'JetBrains Mono',monospace;}
+  .save-note.ok{color:var(--green-go);}
+  .save-note.err{color:var(--red-card);}
+  .locked-banner{
+    text-align:center; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--flood-dim);
+    padding:8px; border:1px dashed var(--flood-dim); border-radius:10px; margin-bottom:10px;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:10px;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); font-size:14px;}
+  th{font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--chalk-dim);}
+  tr:first-child td{padding-top:14px;}
+  .rank{font-family:'Anton',sans-serif; color:var(--flood); font-size:18px;}
+  .pts{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px;}
+  details{margin-top:4px;}
+  summary{cursor:pointer; color:var(--chalk-dim); font-size:12px; font-family:'JetBrains Mono',monospace;}
+  .note-line{font-size:12px; color:var(--chalk-dim); padding:3px 0 3px 12px;}
+
+  .admin-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:640px){ .admin-grid{grid-template-columns:1fr;} .match{grid-template-columns:1fr auto 1fr; padding:14px;} .team-name{font-size:14px;} .score-input{width:38px;} }
+
+  footer{text-align:center; padding:40px 16px 10px; color:var(--chalk-dim); font-size:12px; font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="stripes"></div>
+
+<header>
+  <div class="kicker">Pronósticos de Eliminatorias</div>
+  <h1>Bracket Call</h1>
+  <p class="sub">Elige tus marcadores, recorre el cuadro y cierra la discusión del grupo de WhatsApp.</p>
+</header>
+
+<nav>
+  <button data-panel="register" class="active">Inicio</button>
+  <button data-panel="predict">Pronosticar</button>
+  <button data-panel="leaderboard">Tabla</button>
+  <button data-panel="admin">Admin</button>
+</nav>
+
+<main>
+
+  <!-- REGISTER -->
+  <section class="panel active" id="panel-register">
+    <div class="card">
+      <label for="nameInput">Tu nombre</label>
+      <input type="text" id="nameInput" placeholder="p. ej. Sam" maxlength="40">
+      <div style="margin-top:14px;">
+        <button class="primary" id="registerBtn">Entrar al cuadro</button>
+      </div>
+      <div class="msg" id="registerMsg"></div>
+    </div>
+    <div class="card" style="font-size:13px; color:var(--chalk-dim); line-height:1.6;">
+      <b style="color:var(--chalk);">Cómo se puntúa</b><br>
+      +2 puntos por cada equipo al que le aciertes el marcador exacto en tiempo regular.<br>
+      +2 más por equipo si el partido fue a tiempo extra y también acertaste ese marcador.<br>
+      +3 por equipo si hubo penales y acertaste ese marcador.<br>
+      +3 puntos extra si acertaste quién gana ese cruce exacto.<br>
+      Si uno de los equipos que pronosticaste no llegó realmente a esa instancia, ese pronóstico queda anulado — pero si el <i>otro</i> equipo que pusiste sí jugó de verdad, su marcador puede seguir sumando puntos.
+    </div>
+  </section>
+
+  <!-- PREDICT -->
+  <section class="panel" id="panel-predict">
+    <div class="whoami">
+      <span>Jugando como <b id="whoamiName">—</b></span>
+      <button class="ghost" id="switchPlayerBtn">Cambiar de jugador</button>
+    </div>
+    <div id="bracketContainer"></div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="panel" id="panel-leaderboard">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="round-title" style="margin:0;">Tabla de posiciones</div>
+        <button class="ghost" id="refreshLeaderboard">Actualizar</button>
+      </div>
+      <table id="leaderboardTable">
+        <thead><tr><th>#</th><th>Jugador</th><th>Puntos</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="panel" id="panel-admin">
+    <div class="card">
+      <label for="adminPass">Contraseña de administrador</label>
+      <input type="password" id="adminPass" placeholder="Contraseña">
+      <div style="margin-top:12px;"><button class="primary" id="adminUnlock">Desbloquear admin</button></div>
+      <div class="msg" id="adminMsg"></div>
+    </div>
+    <div id="adminContent" style="display:none;"></div>
+  </section>
+
+</main>
+
+<footer>Los datos viven en tu Google Sheet. No se guarda nada en este navegador.</footer>
+
+<script>
+/* ====================== CONFIG ====================== */
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+/* ====================== STATE ====================== */
+let currentPlayer = localStorage.getItem('bc_player') || '';
+let adminPassword = '';
+let stateCache = null;
+
+/* ====================== API HELPER ======================
+   Apps Script web apps don't handle JSON preflight (OPTIONS) requests,
+   so we POST as text/plain and parse JSON on the server side. */
+async function api(action, payload) {
+  const body = JSON.stringify(Object.assign({ action }, payload || {}));
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+/* ====================== NAV ====================== */
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+});
+function showPanel(name) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  if (name === 'predict') loadBracket();
+  if (name === 'leaderboard') loadLeaderboard();
+}
+
+/* ====================== REGISTER ====================== */
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const name = document.getElementById('nameInput').value.trim();
+  const msg = document.getElementById('registerMsg');
+  if (!name) { msg.textContent = 'Primero escribe un nombre.'; msg.className = 'msg err'; return; }
+  try {
+    await api('registerPlayer', { name });
+    currentPlayer = name;
+    localStorage.setItem('bc_player', name);
+    msg.textContent = "Listo. Ve a Pronosticar.";
+    msg.className = 'msg ok';
+    showPanel('predict');
+  } catch (e) {
+    msg.textContent = e.message; msg.className = 'msg err';
+  }
+});
+document.getElementById('switchPlayerBtn').addEventListener('click', () => {
+  currentPlayer = '';
+  localStorage.removeItem('bc_player');
+  showPanel('register');
+});
+
+/* ====================== BRACKET / PREDICT ====================== */
+const ROUND_ORDER = ['R16', 'QF', 'SF', 'F'];
+const ROUND_LABELS = { R16: 'Octavos de Final', QF: 'Cuartos de Final', SF: 'Semifinales', F: 'Final' };
+
+async function loadBracket() {
+  if (!currentPlayer) { showPanel('register'); return; }
+  document.getElementById('whoamiName').textContent = currentPlayer;
+  const container = document.getElementById('bracketContainer');
+  container.innerHTML = '<p style="color:var(--chalk-dim);">Cargando cuadro…</p>';
+
+  const [state, mine] = await Promise.all([
+    api('getState'),
+    api('getPredictions', { name: currentPlayer })
+  ]);
+  stateCache = state;
+  const myPreds = {};
+  mine.predictions.forEach(p => myPreds[p.MatchID] = p);
+
+  container.innerHTML = '';
+  ROUND_ORDER.forEach(round => {
+    const matches = state.matches.filter(m => m.Round === round);
+    const title = document.createElement('div');
+    title.className = 'round-title';
+    const locked = state.config['Lock' + round] === 'TRUE';
+    title.innerHTML = ROUND_LABELS[round] + (locked ? ' <span class="lock">Bloqueado</span>' : '');
+    container.appendChild(title);
+
+    matches.forEach(m => {
+      const teams = resolveTeamsForUser_(round, m.MatchID, state, myPreds);
+      container.appendChild(renderMatchCard(m, teams, myPreds[m.MatchID], locked));
+    });
+  });
+}
+
+// For rounds after R16, a player's own bracket path determines which two
+// teams they're predicting (their own previous winners), not the real result.
+function resolveTeamsForUser_(round, matchId, state, myPreds) {
+  if (round === 'R16') {
+    const m = state.matches.find(x => x.MatchID === matchId);
+    return { teamA: m.TeamA, teamB: m.TeamB };
+  }
+  const feeders = {
+    'QF-1': ['R16-1', 'R16-2'], 'QF-2': ['R16-3', 'R16-4'], 'QF-3': ['R16-5', 'R16-6'], 'QF-4': ['R16-7', 'R16-8'],
+    'SF-1': ['QF-1', 'QF-2'], 'SF-2': ['QF-3', 'QF-4'],
+    'F-1': ['SF-1', 'SF-2']
+  }[matchId];
+  const teamA = myPreds[feeders[0]] ? myPreds[feeders[0]].Winner : '';
+  const teamB = myPreds[feeders[1]] ? myPreds[feeders[1]].Winner : '';
+  return { teamA, teamB };
+}
+
+function renderMatchCard(match, teams, existing, locked) {
+  const wrap = document.createElement('div');
+  wrap.className = 'match';
+  const disabled = locked || !teams.teamA || !teams.teamB;
+
+  const val = (field) => existing && existing[field] !== '' && existing[field] !== undefined ? existing[field] : '';
+  const chosenWinner = existing ? existing.Winner : '';
+
+  wrap.innerHTML = `
+    <div class="team">
+      <div class="team-name">${teams.teamA || 'Por definir'}</div>
+      <div class="score-row">
+        <input class="score-input s90a" type="number" min="0" placeholder="90'" value="${val('ScoreA90')}" ${disabled?'disabled':''}>
+        <input class="score-input seta" type="number" min="0" placeholder="TE" value="${val('ScoreAET')}" ${disabled?'disabled':''}>
+        <input class="score-input spa" type="number" min="0" placeholder="Pen" value="${val('ScoreAPens')}" ${disabled?'disabled':''}>
+      </div>
+      <button class="pick-btn winA ${chosenWinner===teams.teamA?'chosen':''}" ${disabled?'disabled':''}>Elegir ganador</button>
+    </div>
+    <div class="vs">VS</div>
+    <div class="team right">
+      <div class="team-name">${teams.teamB || 'Por definir'}</div>
+      <div class="score-row">
+        <input class="score-input s90b" type="number" min="0" placeholder="90'" value="${val('ScoreB90')}" ${disabled?'disabled':''}>
+        <input class="score-input setb" type="number" min="0" placeholder="TE" value="${val('ScoreBET')}" ${disabled?'disabled':''}>
+        <input class="score-input spb" type="number" min="0" placeholder="Pen" value="${val('ScoreBPens')}" ${disabled?'disabled':''}>
+      </div>
+      <button class="pick-btn winB ${chosenWinner===teams.teamB?'chosen':''}" ${disabled?'disabled':''}>Elegir ganador</button>
+    </div>
+    <div class="match-footer">
+      <span class="match-id">${match.MatchID}${!teams.teamA || !teams.teamB ? ' — esperando tu pronóstico anterior' : ''}</span>
+      <span class="save-note"></span>
+    </div>
+    ${!disabled ? '<div class="match-footer" style="grid-column:1/-1; justify-content:flex-end;"><button class="primary saveBtn" style="margin-top:8px;">Guardar pronóstico</button></div>' : ''}
+  `;
+
+  if (disabled) return wrap;
+
+  const winABtn = wrap.querySelector('.winA');
+  const winBBtn = wrap.querySelector('.winB');
+  let winner = chosenWinner || '';
+  winABtn.addEventListener('click', () => { winner = teams.teamA; winABtn.classList.add('chosen'); winBBtn.classList.remove('chosen'); });
+  winBBtn.addEventListener('click', () => { winner = teams.teamB; winBBtn.classList.add('chosen'); winABtn.classList.remove('chosen'); });
+
+  wrap.querySelector('.saveBtn').addEventListener('click', async () => {
+    const note = wrap.querySelector('.save-note');
+    const payload = {
+      name: currentPlayer,
+      matchId: match.MatchID,
+      teamA: teams.teamA, teamB: teams.teamB,
+      scoreA90: wrap.querySelector('.s90a').value,
+      scoreB90: wrap.querySelector('.s90b').value,
+      scoreAET: wrap.querySelector('.seta').value,
+      scoreBET: wrap.querySelector('.setb').value,
+      scoreAPens: wrap.querySelector('.spa').value,
+      scoreBPens: wrap.querySelector('.spb').value,
+      winner
+    };
+    try {
+      await api('submitPrediction', payload);
+      note.textContent = 'Guardado ✓'; note.className = 'save-note ok';
+      loadBracket();
+    } catch (e) {
+      note.textContent = e.message; note.className = 'save-note err';
+    }
+  });
+
+  return wrap;
+}
+
+/* ====================== LEADERBOARD ====================== */
+document.getElementById('refreshLeaderboard').addEventListener('click', loadLeaderboard);
+async function loadLeaderboard() {
+  const tbody = document.querySelector('#leaderboardTable tbody');
+  tbody.innerHTML = '<tr><td colspan="4">Cargando…</td></tr>';
+  const data = await api('getLeaderboard');
+  tbody.innerHTML = '';
+  data.leaderboard.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    const notesHtml = row.breakdown.map(b =>
+      `<div class="note-line"><b>${b.matchId}</b> (${b.round}) — ${b.points} pto${b.points===1?'':'s'}${b.notes.length? ': '+b.notes.join(', ') : ''}</div>`
+    ).join('');
+    tr.innerHTML = `
+      <td class="rank">${i+1}</td>
+      <td>${row.name}</td>
+      <td class="pts">${row.points}</td>
+      <td>${row.breakdown.length ? `<details><summary>Detalle</summary>${notesHtml}</details>` : ''}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  if (!data.leaderboard.length) tbody.innerHTML = '<tr><td colspan="4" style="color:var(--chalk-dim);">Todavía no hay jugadores.</td></tr>';
+}
+
+/* ====================== ADMIN ====================== */
+document.getElementById('adminUnlock').addEventListener('click', async () => {
+  const pass = document.getElementById('adminPass').value;
+  const msg = document.getElementById('adminMsg');
+  adminPassword = pass;
+  try {
+    const state = await api('getState');
+    renderAdmin(state);
+    document.getElementById('adminContent').style.display = 'block';
+    msg.textContent = ''; 
+  } catch (e) {
+    msg.textContent = e.message; msg.className = 'msg err';
+  }
+});
+
+function estadoEs_(status) {
+  return status === 'Final' ? 'Finalizado' : 'Pendiente';
+}
+
+function renderAdmin(state) {
+  const el = document.getElementById('adminContent');
+  el.innerHTML = '';
+
+  // Change admin password
+  const passCard = document.createElement('div');
+  passCard.className = 'card';
+  passCard.innerHTML = `
+    <div class="round-title" style="margin-top:0;">Cambiar contraseña de administrador</div>
+    <label>Nueva contraseña</label>
+    <input type="password" class="newPassInput" placeholder="Nueva contraseña">
+    <button class="ghost changePassBtn" style="margin-top:10px;">Actualizar contraseña</button>
+    <div class="msg passMsg"></div>
+  `;
+  passCard.querySelector('.changePassBtn').addEventListener('click', async () => {
+    const note = passCard.querySelector('.passMsg');
+    const newPassword = passCard.querySelector('.newPassInput').value.trim();
+    if (!newPassword) { note.textContent = 'Primero escribe una nueva contraseña.'; note.className = 'msg err'; return; }
+    try {
+      await api('adminChangePassword', { password: adminPassword, newPassword });
+      adminPassword = newPassword;
+      note.textContent = 'Contraseña actualizada.'; note.className = 'msg ok';
+    } catch (e) {
+      note.textContent = e.message; note.className = 'msg err';
+    }
+  });
+  el.appendChild(passCard);
+
+  // Round lock toggles
+  const lockCard = document.createElement('div');
+  lockCard.className = 'card';
+  lockCard.innerHTML = '<div class="round-title" style="margin-top:0;">Bloqueo de rondas</div>';
+  ROUND_ORDER.forEach(r => {
+    const locked = state.config['Lock' + r] === 'TRUE';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line);';
+    row.innerHTML = `<span>${ROUND_LABELS[r]}</span>`;
+    const btn = document.createElement('button');
+    btn.className = 'ghost';
+    btn.textContent = locked ? 'Desbloquear' : 'Bloquear pronósticos';
+    btn.addEventListener('click', async () => {
+      await api('adminSetLock', { password: adminPassword, round: r, locked: !locked });
+      document.getElementById('adminUnlock').click();
+    });
+    row.appendChild(btn);
+    lockCard.appendChild(row);
+  });
+  el.appendChild(lockCard);
+
+  // Per-match admin controls
+  ROUND_ORDER.forEach(round => {
+    const matches = state.matches.filter(m => m.Round === round);
+    const title = document.createElement('div');
+    title.className = 'round-title';
+    title.textContent = ROUND_LABELS[round];
+    el.appendChild(title);
+
+    matches.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const needsTeams = round === 'R16';
+      card.innerHTML = `
+        <div class="match-id" style="margin-bottom:10px;">${m.MatchID} — ${estadoEs_(m.Status)}</div>
+        ${needsTeams ? `
+          <div class="admin-grid">
+            <div><label>Equipo A</label><input type="text" class="teamAInput" value="${m.TeamA||''}"></div>
+            <div><label>Equipo B</label><input type="text" class="teamBInput" value="${m.TeamB||''}"></div>
+          </div>
+          <button class="ghost saveTeams" style="margin-top:10px;">Guardar equipos</button>
+        ` : `<div style="font-size:14px; margin-bottom:8px;">${m.TeamA || 'Por definir'} vs ${m.TeamB || 'Por definir'} <span style="color:var(--chalk-dim); font-size:12px;">(se completa solo según resultados reales)</span></div>`}
+        <div class="admin-grid" style="margin-top:14px;">
+          <div>
+            <label>${m.TeamA || 'Equipo A'} — 90' / TE / Penales</label>
+            <div class="score-row">
+              <input class="score-input rs90a" type="number" min="0" value="${m.ScoreA90||''}">
+              <input class="score-input rseta" type="number" min="0" value="${m.ScoreAET||''}">
+              <input class="score-input rspa" type="number" min="0" value="${m.ScoreAPens||''}">
+            </div>
+          </div>
+          <div>
+            <label>${m.TeamB || 'Equipo B'} — 90' / TE / Penales</label>
+            <div class="score-row">
+              <input class="score-input rs90b" type="number" min="0" value="${m.ScoreB90||''}">
+              <input class="score-input rsetb" type="number" min="0" value="${m.ScoreBET||''}">
+              <input class="score-input rspb" type="number" min="0" value="${m.ScoreBPens||''}">
+            </div>
+          </div>
+        </div>
+        <button class="primary saveResult" style="margin-top:12px;">Guardar resultado</button>
+        <div class="msg resultMsg"></div>
+      `;
+      if (needsTeams) {
+        card.querySelector('.saveTeams').addEventListener('click', async () => {
+          const teamA = card.querySelector('.teamAInput').value.trim();
+          const teamB = card.querySelector('.teamBInput').value.trim();
+          await api('adminSetTeams', { password: adminPassword, matchId: m.MatchID, teamA, teamB });
+          document.getElementById('adminUnlock').click();
+        });
+      }
+      card.querySelector('.saveResult').addEventListener('click', async () => {
+        const note = card.querySelector('.resultMsg');
+        try {
+          await api('adminSubmitResult', {
+            password: adminPassword,
+            matchId: m.MatchID,
+            scoreA90: card.querySelector('.rs90a').value,
+            scoreB90: card.querySelector('.rs90b').value,
+            scoreAET: card.querySelector('.rseta').value,
+            scoreBET: card.querySelector('.rsetb').value,
+            scoreAPens: card.querySelector('.rspa').value,
+            scoreBPens: card.querySelector('.rspb').value
+          });
+          note.textContent = 'Resultado guardado y cuadro actualizado.'; note.className = 'msg ok';
+          document.getElementById('adminUnlock').click();
+        } catch (e) {
+          note.textContent = e.message; note.className = 'msg err';
+        }
+      });
+      el.appendChild(card);
+    });
+  });
+}
+
+/* ====================== INIT ====================== */
+if (currentPlayer) showPanel('predict');
+</script>
+</body>
+</html>

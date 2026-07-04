@@ -73,7 +73,7 @@
   nav button:hover{border-color:var(--flood-dim); color:var(--chalk);}
   nav button.active{background:var(--flood); color:var(--pitch-950); border-color:var(--flood); font-weight:700;}
 
-  main{max-width:960px; margin:0 auto; padding:0 16px;}
+  main{max-width:1200px; margin:0 auto; padding:0 16px;}
   .panel{display:none;}
   .panel.active{display:block; animation:fadeIn .25s ease;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -106,55 +106,66 @@
   .msg{font-size:13px; margin-top:10px; font-family:'JetBrains Mono',monospace;}
   .msg.err{color:var(--red-card);}
   .msg.ok{color:var(--green-go);}
+  .banner{
+    text-align:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--red-card);
+    padding:14px; border:1px solid var(--red-card); border-radius:12px; margin:14px 0; line-height:1.6;
+  }
 
   .whoami{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--chalk-dim);
-    padding:10px 16px; border:1px solid var(--line); border-radius:999px; max-width:520px; margin:0 auto 10px;
+    padding:10px 16px; border:1px solid var(--line); border-radius:999px; max-width:520px; margin:0 auto 20px;
   }
   .whoami b{color:var(--flood);}
 
   .round-title{
     font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:.03em;
-    font-size:20px; margin:30px 0 12px; color:var(--flood);
-    display:flex; align-items:center; gap:10px;
+    font-size:16px; margin:0 0 16px; color:var(--flood);
+    display:flex; align-items:center; gap:8px; justify-content:center;
   }
-  .round-title .lock{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--red-card); border:1px solid var(--red-card); padding:2px 8px; border-radius:999px;}
+  .round-title .lock{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--red-card); border:1px solid var(--red-card); padding:2px 8px; border-radius:999px;}
+
+  /* ============ BRACKET TREE ============ */
+  .bracket-scroll{ overflow-x:auto; padding:6px 6px 20px; }
+  .bracket{
+    position:relative;
+    display:flex;
+    gap:56px;
+    min-width:max-content;
+  }
+  #connectorSvg{ position:absolute; top:0; left:0; pointer-events:none; overflow:visible; }
+  .round-col{
+    display:flex; flex-direction:column; justify-content:space-around;
+    gap:14px; width:250px; position:relative; z-index:1;
+  }
 
   .match{
-    display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center;
-    background:var(--pitch-900); border:1px solid var(--line); border-radius:var(--radius);
-    padding:18px; margin-bottom:14px;
+    background:var(--pitch-900); border:1px solid var(--line); border-radius:12px;
+    padding:12px; position:relative;
   }
-  .team{display:flex; flex-direction:column; gap:8px;}
-  .team.right{align-items:flex-end;}
-  .team-name{font-weight:700; font-size:16px;}
-  .team.right .team-name{text-align:right;}
-  .score-row{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
-  .team.right .score-row{justify-content:flex-end;}
+  .match-id{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--chalk-dim); margin-bottom:8px; text-align:center;}
+  .team-block{
+    display:flex; align-items:center; gap:8px; padding:6px 4px; border-radius:8px; cursor:pointer;
+  }
+  .team-block.chosen{background:rgba(95,209,146,0.12);}
+  .team-block .dot{
+    width:14px; height:14px; border-radius:50%; border:2px solid var(--line); flex-shrink:0;
+  }
+  .team-block.chosen .dot{background:var(--green-go); border-color:var(--green-go);}
+  .team-name{font-weight:700; font-size:14px; flex:1; line-height:1.2;}
+  .score-row{display:flex; gap:5px; padding:2px 4px 8px 26px;}
   .score-input{
-    width:48px; text-align:center; padding:8px 0; border-radius:8px; border:1px solid var(--line);
-    background:var(--pitch-800); color:var(--chalk); font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700;
+    width:36px; text-align:center; padding:6px 0; border-radius:7px; border:1px solid var(--line);
+    background:var(--pitch-800); color:var(--chalk); font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700;
   }
-  .score-input:disabled{opacity:.35;}
-  .score-tag{font-size:10px; color:var(--chalk-dim); font-family:'JetBrains Mono',monospace; text-transform:uppercase;}
-  .vs{
-    font-family:'Anton',sans-serif; color:var(--line); font-size:22px; text-align:center;
-  }
-  .pick-btn{
-    margin-top:4px; font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase;
-    padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--chalk-dim); cursor:pointer;
-  }
-  .pick-btn.chosen{background:var(--green-go); color:var(--pitch-950); border-color:var(--green-go); font-weight:700;}
-  .match-footer{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
-  .match-id{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--chalk-dim);}
-  .save-note{font-size:12px; font-family:'JetBrains Mono',monospace;}
+  .score-input:disabled{opacity:.3;}
+  .divider{border-top:1px dashed var(--line); margin:2px 0;}
+  .match-footer{display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px;}
+  .match-footer button.primary{padding:8px 12px; font-size:11px;}
+  .save-note{font-size:11px; font-family:'JetBrains Mono',monospace;}
   .save-note.ok{color:var(--green-go);}
   .save-note.err{color:var(--red-card);}
-  .locked-banner{
-    text-align:center; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--flood-dim);
-    padding:8px; border:1px dashed var(--flood-dim); border-radius:10px; margin-bottom:10px;
-  }
+  .waiting-note{font-size:11px; color:var(--chalk-dim); font-family:'JetBrains Mono',monospace; text-align:center; padding:6px 0 0;}
 
   table{width:100%; border-collapse:collapse; margin-top:10px;}
   th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); font-size:14px;}
@@ -167,7 +178,7 @@
   .note-line{font-size:12px; color:var(--chalk-dim); padding:3px 0 3px 12px;}
 
   .admin-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  @media (max-width:640px){ .admin-grid{grid-template-columns:1fr;} .match{grid-template-columns:1fr auto 1fr; padding:14px;} .team-name{font-size:14px;} .score-input{width:38px;} }
+  @media (max-width:640px){ .admin-grid{grid-template-columns:1fr;} }
 
   footer{text-align:center; padding:40px 16px 10px; color:var(--chalk-dim); font-size:12px; font-family:'JetBrains Mono',monospace;}
 </style>
@@ -216,7 +227,12 @@
       <span>Jugando como <b id="whoamiName">—</b></span>
       <button class="ghost" id="switchPlayerBtn">Cambiar de jugador</button>
     </div>
-    <div id="bracketContainer"></div>
+    <div id="predictError"></div>
+    <div class="bracket-scroll">
+      <div class="bracket" id="bracketEl">
+        <svg id="connectorSvg"></svg>
+      </div>
+    </div>
   </section>
 
   <!-- LEADERBOARD -->
@@ -226,6 +242,7 @@
         <div class="round-title" style="margin:0;">Tabla de posiciones</div>
         <button class="ghost" id="refreshLeaderboard">Actualizar</button>
       </div>
+      <div id="leaderboardError"></div>
       <table id="leaderboardTable">
         <thead><tr><th>#</th><th>Jugador</th><th>Puntos</th><th></th></tr></thead>
         <tbody></tbody>
@@ -251,25 +268,49 @@
 <script>
 /* ====================== CONFIG ====================== */
 const API_URL = 'https://script.google.com/macros/s/AKfycbwkUV-C-XV1KJFBOpvXSCrbHmG6divkJN2PF3bvidp3tsGMmx9Cl4r9asFP7jBU-EeZ/exec';
-
 /* ====================== STATE ====================== */
 let currentPlayer = localStorage.getItem('bc_player') || '';
 let adminPassword = '';
-let stateCache = null;
+
+const ROUND_ORDER = ['R16', 'QF', 'SF', 'F'];
+const ROUND_LABELS = { R16: 'Octavos de Final', QF: 'Cuartos de Final', SF: 'Semifinales', F: 'Final' };
+const FEEDERS = {
+  'QF-1': ['R16-1', 'R16-2'], 'QF-2': ['R16-3', 'R16-4'], 'QF-3': ['R16-5', 'R16-6'], 'QF-4': ['R16-7', 'R16-8'],
+  'SF-1': ['QF-1', 'QF-2'], 'SF-2': ['QF-3', 'QF-4'],
+  'F-1': ['SF-1', 'SF-2']
+};
 
 /* ====================== API HELPER ======================
    Apps Script web apps don't handle JSON preflight (OPTIONS) requests,
    so we POST as text/plain and parse JSON on the server side. */
 async function api(action, payload) {
-  const body = JSON.stringify(Object.assign({ action }, payload || {}));
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body
-  });
-  const data = await res.json();
+  if (!API_URL || API_URL.indexOf('PASTE_YOUR') === 0) {
+    throw new Error('El sitio todavía no está conectado a Google Sheets. Reemplaza API_URL en index.html con la URL de tu Web App (ver SETUP_INSTRUCTIONS.md).');
+  }
+  let res;
+  try {
+    res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action }, payload || {}))
+    });
+  } catch (networkErr) {
+    throw new Error('No se pudo conectar con el servidor. Revisa tu conexión y que la URL de la API sea correcta.');
+  }
+  let data;
+  try {
+    data = await res.json();
+  } catch (parseErr) {
+    throw new Error('El servidor devolvió una respuesta inesperada. Revisa que el Apps Script esté desplegado como Web App con acceso "Cualquier usuario".');
+  }
   if (data.error) throw new Error(data.error);
   return data;
+}
+
+function showBanner(containerId, message) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = message ? `<div class="banner">${message}</div>` : '';
 }
 
 /* ====================== NAV ====================== */
@@ -306,37 +347,48 @@ document.getElementById('switchPlayerBtn').addEventListener('click', () => {
 });
 
 /* ====================== BRACKET / PREDICT ====================== */
-const ROUND_ORDER = ['R16', 'QF', 'SF', 'F'];
-const ROUND_LABELS = { R16: 'Octavos de Final', QF: 'Cuartos de Final', SF: 'Semifinales', F: 'Final' };
-
 async function loadBracket() {
   if (!currentPlayer) { showPanel('register'); return; }
   document.getElementById('whoamiName').textContent = currentPlayer;
-  const container = document.getElementById('bracketContainer');
-  container.innerHTML = '<p style="color:var(--chalk-dim);">Cargando cuadro…</p>';
+  showBanner('predictError', '');
+  const bracketEl = document.getElementById('bracketEl');
+  bracketEl.querySelectorAll('.round-col').forEach(el => el.remove());
+  bracketEl.insertAdjacentHTML('beforeend', '<p style="color:var(--chalk-dim); padding:20px;">Cargando cuadro…</p>');
 
-  const [state, mine] = await Promise.all([
-    api('getState'),
-    api('getPredictions', { name: currentPlayer })
-  ]);
-  stateCache = state;
+  let state, mine;
+  try {
+    [state, mine] = await Promise.all([
+      api('getState'),
+      api('getPredictions', { name: currentPlayer })
+    ]);
+  } catch (e) {
+    bracketEl.querySelectorAll('p').forEach(p => p.remove());
+    showBanner('predictError', e.message);
+    return;
+  }
+  bracketEl.querySelectorAll('p').forEach(p => p.remove());
+
   const myPreds = {};
   mine.predictions.forEach(p => myPreds[p.MatchID] = p);
 
-  container.innerHTML = '';
   ROUND_ORDER.forEach(round => {
-    const matches = state.matches.filter(m => m.Round === round);
+    const col = document.createElement('div');
+    col.className = 'round-col';
+    col.dataset.round = round;
+    const locked = state.config['Lock' + round] === 'TRUE';
     const title = document.createElement('div');
     title.className = 'round-title';
-    const locked = state.config['Lock' + round] === 'TRUE';
     title.innerHTML = ROUND_LABELS[round] + (locked ? ' <span class="lock">Bloqueado</span>' : '');
-    container.appendChild(title);
+    col.appendChild(title);
 
-    matches.forEach(m => {
+    state.matches.filter(m => m.Round === round).forEach(m => {
       const teams = resolveTeamsForUser_(round, m.MatchID, state, myPreds);
-      container.appendChild(renderMatchCard(m, teams, myPreds[m.MatchID], locked));
+      col.appendChild(renderMatchCard(m, teams, myPreds[m.MatchID], locked));
     });
+    bracketEl.appendChild(col);
   });
+
+  requestAnimationFrame(drawConnectors);
 }
 
 // For rounds after R16, a player's own bracket path determines which two
@@ -346,11 +398,7 @@ function resolveTeamsForUser_(round, matchId, state, myPreds) {
     const m = state.matches.find(x => x.MatchID === matchId);
     return { teamA: m.TeamA, teamB: m.TeamB };
   }
-  const feeders = {
-    'QF-1': ['R16-1', 'R16-2'], 'QF-2': ['R16-3', 'R16-4'], 'QF-3': ['R16-5', 'R16-6'], 'QF-4': ['R16-7', 'R16-8'],
-    'SF-1': ['QF-1', 'QF-2'], 'SF-2': ['QF-3', 'QF-4'],
-    'F-1': ['SF-1', 'SF-2']
-  }[matchId];
+  const feeders = FEEDERS[matchId];
   const teamA = myPreds[feeders[0]] ? myPreds[feeders[0]].Winner : '';
   const teamB = myPreds[feeders[1]] ? myPreds[feeders[1]].Winner : '';
   return { teamA, teamB };
@@ -359,48 +407,50 @@ function resolveTeamsForUser_(round, matchId, state, myPreds) {
 function renderMatchCard(match, teams, existing, locked) {
   const wrap = document.createElement('div');
   wrap.className = 'match';
+  wrap.dataset.matchId = match.MatchID;
   const disabled = locked || !teams.teamA || !teams.teamB;
 
   const val = (field) => existing && existing[field] !== '' && existing[field] !== undefined ? existing[field] : '';
   const chosenWinner = existing ? existing.Winner : '';
 
   wrap.innerHTML = `
-    <div class="team">
-      <div class="team-name">${teams.teamA || 'Por definir'}</div>
-      <div class="score-row">
-        <input class="score-input s90a" type="number" min="0" placeholder="90'" value="${val('ScoreA90')}" ${disabled?'disabled':''}>
-        <input class="score-input seta" type="number" min="0" placeholder="TE" value="${val('ScoreAET')}" ${disabled?'disabled':''}>
-        <input class="score-input spa" type="number" min="0" placeholder="Pen" value="${val('ScoreAPens')}" ${disabled?'disabled':''}>
-      </div>
-      <button class="pick-btn winA ${chosenWinner===teams.teamA?'chosen':''}" ${disabled?'disabled':''}>Elegir ganador</button>
+    <div class="match-id">${match.MatchID}</div>
+    <div class="team-block sideA ${chosenWinner===teams.teamA && teams.teamA ? 'chosen':''}">
+      <span class="dot"></span>
+      <span class="team-name">${teams.teamA || 'Por definir'}</span>
     </div>
-    <div class="vs">VS</div>
-    <div class="team right">
-      <div class="team-name">${teams.teamB || 'Por definir'}</div>
-      <div class="score-row">
-        <input class="score-input s90b" type="number" min="0" placeholder="90'" value="${val('ScoreB90')}" ${disabled?'disabled':''}>
-        <input class="score-input setb" type="number" min="0" placeholder="TE" value="${val('ScoreBET')}" ${disabled?'disabled':''}>
-        <input class="score-input spb" type="number" min="0" placeholder="Pen" value="${val('ScoreBPens')}" ${disabled?'disabled':''}>
-      </div>
-      <button class="pick-btn winB ${chosenWinner===teams.teamB?'chosen':''}" ${disabled?'disabled':''}>Elegir ganador</button>
+    <div class="score-row">
+      <input class="score-input s90a" type="number" min="0" placeholder="90'" value="${val('ScoreA90')}" ${disabled?'disabled':''}>
+      <input class="score-input seta" type="number" min="0" placeholder="TE" value="${val('ScoreAET')}" ${disabled?'disabled':''}>
+      <input class="score-input spa" type="number" min="0" placeholder="Pen" value="${val('ScoreAPens')}" ${disabled?'disabled':''}>
     </div>
-    <div class="match-footer">
-      <span class="match-id">${match.MatchID}${!teams.teamA || !teams.teamB ? ' — esperando tu pronóstico anterior' : ''}</span>
-      <span class="save-note"></span>
+    <div class="divider"></div>
+    <div class="team-block sideB ${chosenWinner===teams.teamB && teams.teamB ? 'chosen':''}">
+      <span class="dot"></span>
+      <span class="team-name">${teams.teamB || 'Por definir'}</span>
     </div>
-    ${!disabled ? '<div class="match-footer" style="grid-column:1/-1; justify-content:flex-end;"><button class="primary saveBtn" style="margin-top:8px;">Guardar pronóstico</button></div>' : ''}
+    <div class="score-row">
+      <input class="score-input s90b" type="number" min="0" placeholder="90'" value="${val('ScoreB90')}" ${disabled?'disabled':''}>
+      <input class="score-input setb" type="number" min="0" placeholder="TE" value="${val('ScoreBET')}" ${disabled?'disabled':''}>
+      <input class="score-input spb" type="number" min="0" placeholder="Pen" value="${val('ScoreBPens')}" ${disabled?'disabled':''}>
+    </div>
+    ${disabled
+      ? `<div class="waiting-note">${locked ? 'Ronda bloqueada' : 'Esperando definición de equipos'}</div>`
+      : `<div class="match-footer"><button class="primary saveBtn">Guardar</button><span class="save-note"></span></div>`
+    }
   `;
 
   if (disabled) return wrap;
 
-  const winABtn = wrap.querySelector('.winA');
-  const winBBtn = wrap.querySelector('.winB');
+  const blockA = wrap.querySelector('.sideA');
+  const blockB = wrap.querySelector('.sideB');
   let winner = chosenWinner || '';
-  winABtn.addEventListener('click', () => { winner = teams.teamA; winABtn.classList.add('chosen'); winBBtn.classList.remove('chosen'); });
-  winBBtn.addEventListener('click', () => { winner = teams.teamB; winBBtn.classList.add('chosen'); winABtn.classList.remove('chosen'); });
+  blockA.addEventListener('click', () => { winner = teams.teamA; blockA.classList.add('chosen'); blockB.classList.remove('chosen'); });
+  blockB.addEventListener('click', () => { winner = teams.teamB; blockB.classList.add('chosen'); blockA.classList.remove('chosen'); });
 
   wrap.querySelector('.saveBtn').addEventListener('click', async () => {
     const note = wrap.querySelector('.save-note');
+    if (!winner) { note.textContent = 'Elige un ganador tocando un equipo.'; note.className = 'save-note err'; return; }
     const payload = {
       name: currentPlayer,
       matchId: match.MatchID,
@@ -425,12 +475,55 @@ function renderMatchCard(match, teams, existing, locked) {
   return wrap;
 }
 
+/* ====================== CONNECTOR LINES (bracket tree) ====================== */
+function drawConnectors() {
+  const svg = document.getElementById('connectorSvg');
+  const bracketEl = document.getElementById('bracketEl');
+  if (!svg || !bracketEl) return;
+  const rect = bracketEl.getBoundingClientRect();
+  svg.setAttribute('width', bracketEl.scrollWidth);
+  svg.setAttribute('height', bracketEl.scrollHeight);
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+
+  Object.keys(FEEDERS).forEach(targetId => {
+    const [f1, f2] = FEEDERS[targetId];
+    const elT = bracketEl.querySelector(`[data-match-id="${targetId}"]`);
+    const el1 = bracketEl.querySelector(`[data-match-id="${f1}"]`);
+    const el2 = bracketEl.querySelector(`[data-match-id="${f2}"]`);
+    if (!elT || !el1 || !el2) return;
+    const rT = elT.getBoundingClientRect();
+    const target = { x: rT.left - rect.left, y: rT.top + rT.height / 2 - rect.top };
+
+    [el1, el2].forEach(feederEl => {
+      const rF = feederEl.getBoundingClientRect();
+      const feeder = { x: rF.right - rect.left, y: rF.top + rF.height / 2 - rect.top };
+      const midX = (feeder.x + target.x) / 2;
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', `M ${feeder.x} ${feeder.y} H ${midX} V ${target.y} H ${target.x}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', '#2c6a56');
+      path.setAttribute('stroke-width', '2');
+      svg.appendChild(path);
+    });
+  });
+}
+window.addEventListener('resize', () => requestAnimationFrame(drawConnectors));
+
 /* ====================== LEADERBOARD ====================== */
 document.getElementById('refreshLeaderboard').addEventListener('click', loadLeaderboard);
 async function loadLeaderboard() {
+  showBanner('leaderboardError', '');
   const tbody = document.querySelector('#leaderboardTable tbody');
   tbody.innerHTML = '<tr><td colspan="4">Cargando…</td></tr>';
-  const data = await api('getLeaderboard');
+  let data;
+  try {
+    data = await api('getLeaderboard');
+  } catch (e) {
+    tbody.innerHTML = '';
+    showBanner('leaderboardError', e.message);
+    return;
+  }
   tbody.innerHTML = '';
   data.leaderboard.forEach((row, i) => {
     const tr = document.createElement('tr');
@@ -457,7 +550,7 @@ document.getElementById('adminUnlock').addEventListener('click', async () => {
     const state = await api('getState');
     renderAdmin(state);
     document.getElementById('adminContent').style.display = 'block';
-    msg.textContent = ''; 
+    msg.textContent = '';
   } catch (e) {
     msg.textContent = e.message; msg.className = 'msg err';
   }
@@ -498,7 +591,8 @@ function renderAdmin(state) {
   // Round lock toggles
   const lockCard = document.createElement('div');
   lockCard.className = 'card';
-  lockCard.innerHTML = '<div class="round-title" style="margin-top:0;">Bloqueo de rondas</div>';
+  lockCard.innerHTML = '<div class="round-title" style="margin-top:0;">Bloqueo de rondas</div><div class="lockRows"></div><div class="msg lockMsg"></div>';
+  const lockRows = lockCard.querySelector('.lockRows');
   ROUND_ORDER.forEach(r => {
     const locked = state.config['Lock' + r] === 'TRUE';
     const row = document.createElement('div');
@@ -508,11 +602,16 @@ function renderAdmin(state) {
     btn.className = 'ghost';
     btn.textContent = locked ? 'Desbloquear' : 'Bloquear pronósticos';
     btn.addEventListener('click', async () => {
-      await api('adminSetLock', { password: adminPassword, round: r, locked: !locked });
-      document.getElementById('adminUnlock').click();
+      const note = lockCard.querySelector('.lockMsg');
+      try {
+        await api('adminSetLock', { password: adminPassword, round: r, locked: !locked });
+        document.getElementById('adminUnlock').click();
+      } catch (e) {
+        note.textContent = e.message; note.className = 'msg err';
+      }
     });
     row.appendChild(btn);
-    lockCard.appendChild(row);
+    lockRows.appendChild(row);
   });
   el.appendChild(lockCard);
 
@@ -521,6 +620,7 @@ function renderAdmin(state) {
     const matches = state.matches.filter(m => m.Round === round);
     const title = document.createElement('div');
     title.className = 'round-title';
+    title.style.justifyContent = 'flex-start';
     title.textContent = ROUND_LABELS[round];
     el.appendChild(title);
 
@@ -529,18 +629,19 @@ function renderAdmin(state) {
       card.className = 'card';
       const needsTeams = round === 'R16';
       card.innerHTML = `
-        <div class="match-id" style="margin-bottom:10px;">${m.MatchID} — ${estadoEs_(m.Status)}</div>
+        <div class="match-id" style="margin-bottom:10px; text-align:left;">${m.MatchID} — ${estadoEs_(m.Status)}</div>
         ${needsTeams ? `
           <div class="admin-grid">
             <div><label>Equipo A</label><input type="text" class="teamAInput" value="${m.TeamA||''}"></div>
             <div><label>Equipo B</label><input type="text" class="teamBInput" value="${m.TeamB||''}"></div>
           </div>
           <button class="ghost saveTeams" style="margin-top:10px;">Guardar equipos</button>
+          <div class="msg teamsMsg"></div>
         ` : `<div style="font-size:14px; margin-bottom:8px;">${m.TeamA || 'Por definir'} vs ${m.TeamB || 'Por definir'} <span style="color:var(--chalk-dim); font-size:12px;">(se completa solo según resultados reales)</span></div>`}
         <div class="admin-grid" style="margin-top:14px;">
           <div>
             <label>${m.TeamA || 'Equipo A'} — 90' / TE / Penales</label>
-            <div class="score-row">
+            <div class="score-row" style="padding-left:0;">
               <input class="score-input rs90a" type="number" min="0" value="${m.ScoreA90||''}">
               <input class="score-input rseta" type="number" min="0" value="${m.ScoreAET||''}">
               <input class="score-input rspa" type="number" min="0" value="${m.ScoreAPens||''}">
@@ -548,7 +649,7 @@ function renderAdmin(state) {
           </div>
           <div>
             <label>${m.TeamB || 'Equipo B'} — 90' / TE / Penales</label>
-            <div class="score-row">
+            <div class="score-row" style="padding-left:0;">
               <input class="score-input rs90b" type="number" min="0" value="${m.ScoreB90||''}">
               <input class="score-input rsetb" type="number" min="0" value="${m.ScoreBET||''}">
               <input class="score-input rspb" type="number" min="0" value="${m.ScoreBPens||''}">
@@ -560,10 +661,15 @@ function renderAdmin(state) {
       `;
       if (needsTeams) {
         card.querySelector('.saveTeams').addEventListener('click', async () => {
+          const note = card.querySelector('.teamsMsg');
           const teamA = card.querySelector('.teamAInput').value.trim();
           const teamB = card.querySelector('.teamBInput').value.trim();
-          await api('adminSetTeams', { password: adminPassword, matchId: m.MatchID, teamA, teamB });
-          document.getElementById('adminUnlock').click();
+          try {
+            await api('adminSetTeams', { password: adminPassword, matchId: m.MatchID, teamA, teamB });
+            document.getElementById('adminUnlock').click();
+          } catch (e) {
+            note.textContent = e.message; note.className = 'msg err';
+          }
         });
       }
       card.querySelector('.saveResult').addEventListener('click', async () => {

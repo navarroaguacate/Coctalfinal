@@ -268,7 +268,7 @@
 
 <script>
 /* ====================== CONFIG ====================== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbyKRGQWxALKkdPMf9WjzwacX_g0JyfUEqlGU8anIER5rOcrSg_aG23bwSgLWPksSwFo/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzGSOZdvebuITQbUZrnL6_ZJe8e8moCSa5xzhDPfUCxI68FrIsn54pyUAEYc7r7vOTg/exec';
 
 /* ====================== STATE ====================== */
 let currentPlayer = localStorage.getItem('bc_player') || '';
@@ -599,6 +599,38 @@ function renderAdmin(state) {
     }
   });
   el.appendChild(passCard);
+
+  // Manage players (delete/eliminate)
+  const playersCard = document.createElement('div');
+  playersCard.className = 'card';
+  playersCard.innerHTML = '<div class="round-title" style="margin-top:0;">Jugadores</div><div class="playerRows"></div><div class="msg playersMsg"></div>';
+  const playerRows = playersCard.querySelector('.playerRows');
+  if (!state.players.length) {
+    playerRows.innerHTML = '<div style="color:var(--chalk-dim); font-size:13px;">Todavía no hay jugadores registrados.</div>';
+  }
+  state.players.forEach(name => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line);';
+    row.innerHTML = `<span>${name}</span>`;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'ghost';
+    delBtn.style.borderColor = 'var(--red-card)';
+    delBtn.style.color = 'var(--red-card)';
+    delBtn.textContent = 'Eliminar';
+    delBtn.addEventListener('click', async () => {
+      const note = playersCard.querySelector('.playersMsg');
+      if (!confirm(`¿Eliminar a "${name}"? Esto borra también todos sus pronósticos. Esta acción no se puede deshacer.`)) return;
+      try {
+        await api('adminDeletePlayer', { password: adminPassword, name });
+        document.getElementById('adminUnlock').click();
+      } catch (e) {
+        note.textContent = e.message; note.className = 'msg err';
+      }
+    });
+    row.appendChild(delBtn);
+    playerRows.appendChild(row);
+  });
+  el.appendChild(playersCard);
 
   // Round lock toggles
   const lockCard = document.createElement('div');

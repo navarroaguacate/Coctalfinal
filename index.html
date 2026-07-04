@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bracket Call — Pronósticos del Mundial</title>
+<title>Octavos hasta la Final — Pronósticos del Mundial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -175,7 +175,8 @@
   .pts{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px;}
   details{margin-top:4px;}
   summary{cursor:pointer; color:var(--chalk-dim); font-size:12px; font-family:'JetBrains Mono',monospace;}
-  .note-line{font-size:12px; color:var(--chalk-dim); padding:3px 0 3px 12px;}
+  .note-line{font-size:12px; color:var(--chalk-dim); padding:8px 0 8px 12px; border-bottom:1px solid var(--line); line-height:1.6;}
+  .note-line:last-child{border-bottom:none;}
 
   .admin-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
   @media (max-width:640px){ .admin-grid{grid-template-columns:1fr;} }
@@ -188,8 +189,8 @@
 
 <header>
   <div class="kicker">Pronósticos de Eliminatorias</div>
-  <h1>Octavos hasta la final</h1>
-  <p class="sub">Elige tus marcadores</p>
+  <h1>Octavos hasta la Final</h1>
+  <p class="sub">Elige tus marcadores.</p>
 </header>
 
 <nav>
@@ -263,11 +264,11 @@
 
 </main>
 
-<footer>Los datos viven en tu Google Sheet. No se guarda nada en este navegador.</footer>
+
 
 <script>
 /* ====================== CONFIG ====================== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbx6PGOfYUCdK7OnKmG9cLWfQnKbZ9OIkYKn6q6uxAGIuZ0sQsRjroe1Gw-l_E-fn1qN/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyKRGQWxALKkdPMf9WjzwacX_g0JyfUEqlGU8anIER5rOcrSg_aG23bwSgLWPksSwFo/exec';
 
 /* ====================== STATE ====================== */
 let currentPlayer = localStorage.getItem('bc_player') || '';
@@ -389,7 +390,7 @@ async function loadBracket() {
     bracketEl.appendChild(col);
   });
 
-  requestAnimationFrame(drawConnectors);
+  requestAnimationFrame(() => drawConnectorsFor('bracketEl', 'connectorSvg'));
 }
 
 // For rounds after R16, a player's own bracket path determines which two
@@ -409,39 +410,46 @@ function renderMatchCard(match, teams, existing, locked) {
   const wrap = document.createElement('div');
   wrap.className = 'match';
   wrap.dataset.matchId = match.MatchID;
-  const disabled = locked || !teams.teamA || !teams.teamB;
+  const teamsKnown = !!(teams.teamA && teams.teamB);
+  const alreadySubmitted = !!existing;
+  const editable = teamsKnown && !locked && !alreadySubmitted;
+  const inputsDisabled = !editable; // disabled whenever not actively editable (includes "already submitted, show read-only")
 
   const val = (field) => existing && existing[field] !== '' && existing[field] !== undefined ? existing[field] : '';
   const chosenWinner = existing ? existing.Winner : '';
 
   wrap.innerHTML = `
     <div class="match-id">${match.MatchID}</div>
-    <div class="team-block sideA ${chosenWinner===teams.teamA && teams.teamA ? 'chosen':''}">
+    <div class="team-block sideA ${chosenWinner===teams.teamA && teams.teamA ? 'chosen':''}" style="${editable?'':'cursor:default;'}">
       <span class="dot"></span>
       <span class="team-name">${teams.teamA || 'Por definir'}</span>
     </div>
     <div class="score-row">
-      <input class="score-input s90a" type="number" min="0" placeholder="90'" value="${val('ScoreA90')}" ${disabled?'disabled':''}>
-      <input class="score-input seta" type="number" min="0" placeholder="TE" value="${val('ScoreAET')}" ${disabled?'disabled':''}>
-      <input class="score-input spa" type="number" min="0" placeholder="Pen" value="${val('ScoreAPens')}" ${disabled?'disabled':''}>
+      <input class="score-input s90a" type="number" min="0" placeholder="90'" value="${val('ScoreA90')}" ${inputsDisabled?'disabled':''}>
+      <input class="score-input seta" type="number" min="0" placeholder="TE" value="${val('ScoreAET')}" ${inputsDisabled?'disabled':''}>
+      <input class="score-input spa" type="number" min="0" placeholder="Pen" value="${val('ScoreAPens')}" ${inputsDisabled?'disabled':''}>
     </div>
     <div class="divider"></div>
-    <div class="team-block sideB ${chosenWinner===teams.teamB && teams.teamB ? 'chosen':''}">
+    <div class="team-block sideB ${chosenWinner===teams.teamB && teams.teamB ? 'chosen':''}" style="${editable?'':'cursor:default;'}">
       <span class="dot"></span>
       <span class="team-name">${teams.teamB || 'Por definir'}</span>
     </div>
     <div class="score-row">
-      <input class="score-input s90b" type="number" min="0" placeholder="90'" value="${val('ScoreB90')}" ${disabled?'disabled':''}>
-      <input class="score-input setb" type="number" min="0" placeholder="TE" value="${val('ScoreBET')}" ${disabled?'disabled':''}>
-      <input class="score-input spb" type="number" min="0" placeholder="Pen" value="${val('ScoreBPens')}" ${disabled?'disabled':''}>
+      <input class="score-input s90b" type="number" min="0" placeholder="90'" value="${val('ScoreB90')}" ${inputsDisabled?'disabled':''}>
+      <input class="score-input setb" type="number" min="0" placeholder="TE" value="${val('ScoreBET')}" ${inputsDisabled?'disabled':''}>
+      <input class="score-input spb" type="number" min="0" placeholder="Pen" value="${val('ScoreBPens')}" ${inputsDisabled?'disabled':''}>
     </div>
-    ${disabled
-      ? `<div class="waiting-note">${locked ? 'Ronda bloqueada' : 'Esperando definición de equipos'}</div>`
-      : `<div class="match-footer"><button class="primary saveBtn">Guardar</button><span class="save-note"></span></div>`
+    ${editable
+      ? `<div class="match-footer"><button class="primary saveBtn">Guardar</button><span class="save-note"></span></div>`
+      : `<div class="waiting-note">${
+          alreadySubmitted ? 'Pronóstico enviado ✓ (no editable)' :
+          locked ? 'Ronda bloqueada' :
+          'Esperando definición de equipos'
+        }</div>`
     }
   `;
 
-  if (disabled) return wrap;
+  if (!editable) return wrap;
 
   const blockA = wrap.querySelector('.sideA');
   const blockB = wrap.querySelector('.sideB');
@@ -477,9 +485,9 @@ function renderMatchCard(match, teams, existing, locked) {
 }
 
 /* ====================== CONNECTOR LINES (bracket tree) ====================== */
-function drawConnectors() {
-  const svg = document.getElementById('connectorSvg');
-  const bracketEl = document.getElementById('bracketEl');
+function drawConnectorsFor(containerId, svgId) {
+  const svg = document.getElementById(svgId);
+  const bracketEl = document.getElementById(containerId);
   if (!svg || !bracketEl) return;
   const rect = bracketEl.getBoundingClientRect();
   svg.setAttribute('width', bracketEl.scrollWidth);
@@ -509,7 +517,10 @@ function drawConnectors() {
     });
   });
 }
-window.addEventListener('resize', () => requestAnimationFrame(drawConnectors));
+window.addEventListener('resize', () => requestAnimationFrame(() => {
+  drawConnectorsFor('bracketEl', 'connectorSvg');
+  drawConnectorsFor('adminBracketEl', 'adminConnectorSvg');
+}));
 
 /* ====================== LEADERBOARD ====================== */
 document.getElementById('refreshLeaderboard').addEventListener('click', loadLeaderboard);
@@ -529,7 +540,7 @@ async function loadLeaderboard() {
   data.leaderboard.forEach((row, i) => {
     const tr = document.createElement('tr');
     const notesHtml = row.breakdown.map(b =>
-      `<div class="note-line"><b>${b.matchId}</b> (${b.round}) — ${b.points} pto${b.points===1?'':'s'}${b.notes.length? ': '+b.notes.join(', ') : ''}</div>`
+      `<div class="note-line"><b>${b.matchId}</b> (${b.round}) — ${b.points} pto${b.points===1?'':'s'}<br>Su pronóstico: ${b.prediction}<br>Resultado real: ${b.actual}${b.notes.length? '<br>'+b.notes.join('<br>') : ''}</div>`
     ).join('');
     tr.innerHTML = `
       <td class="rank">${i+1}</td>
@@ -616,48 +627,52 @@ function renderAdmin(state) {
   });
   el.appendChild(lockCard);
 
-  // Per-match admin controls
+  // Per-match admin controls — bracket tree layout (mirrors the Predict tab)
+  const scrollWrap = document.createElement('div');
+  scrollWrap.className = 'bracket-scroll';
+  const adminBracketEl = document.createElement('div');
+  adminBracketEl.className = 'bracket';
+  adminBracketEl.id = 'adminBracketEl';
+  adminBracketEl.innerHTML = '<svg id="adminConnectorSvg"></svg>';
+  scrollWrap.appendChild(adminBracketEl);
+  el.appendChild(scrollWrap);
+
   ROUND_ORDER.forEach(round => {
     const matches = state.matches.filter(m => m.Round === round);
+    const col = document.createElement('div');
+    col.className = 'round-col';
+    col.dataset.round = round;
     const title = document.createElement('div');
     title.className = 'round-title';
-    title.style.justifyContent = 'flex-start';
     title.textContent = ROUND_LABELS[round];
-    el.appendChild(title);
+    col.appendChild(title);
 
     matches.forEach(m => {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'match';
+      card.dataset.matchId = m.MatchID;
       const needsTeams = round === 'R16';
       card.innerHTML = `
-        <div class="match-id" style="margin-bottom:10px; text-align:left;">${m.MatchID} — ${estadoEs_(m.Status)}</div>
+        <div class="match-id">${m.MatchID} — ${estadoEs_(m.Status)}</div>
         ${needsTeams ? `
-          <div class="admin-grid">
-            <div><label>Equipo A</label><input type="text" class="teamAInput" value="${m.TeamA||''}"></div>
-            <div><label>Equipo B</label><input type="text" class="teamBInput" value="${m.TeamB||''}"></div>
-          </div>
-          <button class="ghost saveTeams" style="margin-top:10px;">Guardar equipos</button>
-          <div class="msg teamsMsg"></div>
-        ` : `<div style="font-size:14px; margin-bottom:8px;">${m.TeamA || 'Por definir'} vs ${m.TeamB || 'Por definir'} <span style="color:var(--chalk-dim); font-size:12px;">(se completa solo según resultados reales)</span></div>`}
-        <div class="admin-grid" style="margin-top:14px;">
-          <div>
-            <label>${m.TeamA || 'Equipo A'} — 90' / TE / Penales</label>
-            <div class="score-row" style="padding-left:0;">
-              <input class="score-input rs90a" type="number" min="0" value="${m.ScoreA90||''}">
-              <input class="score-input rseta" type="number" min="0" value="${m.ScoreAET||''}">
-              <input class="score-input rspa" type="number" min="0" value="${m.ScoreAPens||''}">
-            </div>
-          </div>
-          <div>
-            <label>${m.TeamB || 'Equipo B'} — 90' / TE / Penales</label>
-            <div class="score-row" style="padding-left:0;">
-              <input class="score-input rs90b" type="number" min="0" value="${m.ScoreB90||''}">
-              <input class="score-input rsetb" type="number" min="0" value="${m.ScoreBET||''}">
-              <input class="score-input rspb" type="number" min="0" value="${m.ScoreBPens||''}">
-            </div>
-          </div>
+          <input type="text" class="teamAInput" placeholder="Equipo A" value="${m.TeamA||''}" style="margin-bottom:8px;">
+        ` : `<div class="team-name" style="margin-bottom:6px;">${m.TeamA || 'Por definir'}</div>`}
+        <div class="score-row">
+          <input class="score-input rs90a" type="number" min="0" placeholder="90'" value="${m.ScoreA90||''}">
+          <input class="score-input rseta" type="number" min="0" placeholder="TE" value="${m.ScoreAET||''}">
+          <input class="score-input rspa" type="number" min="0" placeholder="Pen" value="${m.ScoreAPens||''}">
         </div>
-        <button class="primary saveResult" style="margin-top:12px;">Guardar resultado</button>
+        <div class="divider"></div>
+        ${needsTeams ? `
+          <input type="text" class="teamBInput" placeholder="Equipo B" value="${m.TeamB||''}" style="margin:8px 0;">
+        ` : `<div class="team-name" style="margin:6px 0;">${m.TeamB || 'Por definir'}</div>`}
+        <div class="score-row">
+          <input class="score-input rs90b" type="number" min="0" placeholder="90'" value="${m.ScoreB90||''}">
+          <input class="score-input rsetb" type="number" min="0" placeholder="TE" value="${m.ScoreBET||''}">
+          <input class="score-input rspb" type="number" min="0" placeholder="Pen" value="${m.ScoreBPens||''}">
+        </div>
+        ${needsTeams ? `<button class="ghost saveTeams" style="margin-top:10px; width:100%;">Guardar equipos</button><div class="msg teamsMsg"></div>` : ''}
+        <div class="match-footer"><button class="primary saveResult">Guardar resultado</button></div>
         <div class="msg resultMsg"></div>
       `;
       if (needsTeams) {
@@ -692,9 +707,12 @@ function renderAdmin(state) {
           note.textContent = e.message; note.className = 'msg err';
         }
       });
-      el.appendChild(card);
+      col.appendChild(card);
     });
+    adminBracketEl.appendChild(col);
   });
+
+  requestAnimationFrame(() => drawConnectorsFor('adminBracketEl', 'adminConnectorSvg'));
 }
 
 /* ====================== INIT ====================== */
